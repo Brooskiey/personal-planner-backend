@@ -25,7 +25,7 @@
     "task_type_name":"string",
     "status_name":"string",
     "recurrence": "string",
-    "last_date": "Date",
+    "last_date_occurred": "Date",
     "date_initiated":"Date",
     "date_completed":"Date",
     "is_complete":"boolean"
@@ -34,21 +34,22 @@
   
 ## Database
 - TASK
-  - task_id:number (Primary Key)
+  - id:number (Primary Key)
   - name:string
-  - taskType_id:number (Foreign Key)
+  - type_id:number (Foreign Key)
   - status_id:number (Foreign Key)
-  - recurr_task_id:number (Foreign Key)
+  - recurr_id:number (Foreign Key)
+  - last_date_occurred:Date
   - date_initiated:Date
   - date_completed:Date
   - is_complete:boolean
 - TASK_TYPE
-  - task_type_id:number (Primary Key)
+  - id:number (Primary Key)
   - name:string
 - TASK_STATUS
-  - status_id:number (Primary Key)
+  - id:number (Primary Key)
   - name:string
 - RECURR_TASK
-  - recurr_task_id:number (Primary Key)
+  - id:number (Primary Key)
   - recurrence:string
   - last_date:Date
