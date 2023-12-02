@@ -5,6 +5,7 @@ import dev.brooskiey.personalplanner.models.RecurrTask;
 import dev.brooskiey.personalplanner.models.Task;
 import dev.brooskiey.personalplanner.models.TaskStatus;
 import dev.brooskiey.personalplanner.models.TaskType;
+import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -15,10 +16,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Date;
+import java.util.List;
 
 @SpringBootTest(classes= PersonalPlannerBackendApplication.class)
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TaskRepoTest {
 
     @Autowired
@@ -33,14 +36,14 @@ public class TaskRepoTest {
     @Autowired
     private TaskTypeRepo typeRepo;
 
+    Task task;
     RecurrTask recurrTask;
     TaskStatus status;
     TaskType type;
 
     // Setup for the tests
-    @Test
-    @Order(1)
-    public void setup() {
+    @BeforeAll
+    void setup() {
         RecurrTask recurTask = new RecurrTask(1, "vacuum", new Date(System.currentTimeMillis()));
         recurrTask = recurrRepo.save(recurTask);
         Assertions.assertNotEquals(0, recurrTask.getId());
@@ -52,51 +55,72 @@ public class TaskRepoTest {
         TaskType taskType = new TaskType(1, "Cleaning");
         type = typeRepo.save(taskType);
         Assertions.assertNotEquals(0, type.getId());
+
+        task = new Task(0, "Test Task", type, status, recurrTask,
+                new Date(System.currentTimeMillis()), null, false);
     }
 
     // Save success
     @Test
-    @Order(2)
+    @Order(1)
     public void saveTask_success() {
-        Task task = new Task(0, "Test Task", type, status, recurrTask,
-                new Date(System.currentTimeMillis()), null, false);
         task = taskRepo.save(task);
         Assertions.assertNotEquals(0, task.getId());
     }
 
-    // Get success
+    // Get task by id success
+    @Test
+    @Order(2)
+    public void getTaskById_success() {
+        System.out.println(task);
+        Task taskFound = taskRepo.findById(task.getId());
+        Assertions.assertNotNull(taskFound);
+        Assertions.assertEquals(task.getId(), taskFound.getId());
+    }
+
     @Test
     @Order(3)
-    public void getTask_success() {
+    public void getTaskByDateInitiated_success(){
+        List<Task> tasks = taskRepo.findByDateInitiated(task.getDateInitiated());
+        Assertions.assertTrue(tasks.size()>=1);
+    }
 
+    @Test
+    @Order(4)
+    public void getTaskByRecurrenceId_success(){
+        List<Task> tasks = taskRepo.findByRecurrenceId(recurrTask.getId());
+        Assertions.assertTrue(tasks.size()>=1);
     }
 
     // Get all success
     @Test
-    @Order(4)
+    @Order(5)
     public void getAllTasks_success() {
-
+        List<Task> tasks = (List<Task>) taskRepo.findAll();
+        Assertions.assertTrue(tasks.size()>=1);
     }
 
     // Update success
     @Test
-    @Order(5)
-    public void updateTask_success() {
-
-    }
-
-    // Update failed
-    @Test
     @Order(6)
-    public void updateTask_fail() {
+    public void updateTask_success() {
+        TaskStatus taskStatus = new TaskStatus(2, "Completed");
+        status = statusRepo.save(taskStatus);
 
+        task.setComplete(true);
+        task.setStatus(taskStatus);
+
+        Task savedTask = taskRepo.save(task);
+        Assertions.assertEquals(task.getStatus().getName(), savedTask.getStatus().getName());
+        Assertions.assertTrue(savedTask.isComplete());
+        Assertions.assertEquals(task.getStatus().getId(), status.getId());
     }
 
-    // Delete success
+    // delete success
     @Test
     @Order(7)
     public void deleteTask_success() {
-
+        taskRepo.deleteById(task.getId());
     }
 
 }

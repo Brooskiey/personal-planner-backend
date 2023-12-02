@@ -54,4 +54,7 @@ public class Task {
         this.dateCompleted = dateCompleted;
         this.isComplete = isComplete;
     }
+
+    public Task() {
+    }
 }
