@@ -5,15 +5,10 @@ import dev.brooskiey.personalplanner.models.RecurrTask;
 import dev.brooskiey.personalplanner.models.Task;
 import dev.brooskiey.personalplanner.models.TaskStatus;
 import dev.brooskiey.personalplanner.models.TaskType;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Date;
 import java.util.List;
@@ -72,7 +67,6 @@ public class TaskRepoTest {
     @Test
     @Order(2)
     public void getTaskById_success() {
-        System.out.println(task);
         Task taskFound = taskRepo.findById(task.getId());
         Assertions.assertNotNull(taskFound);
         Assertions.assertEquals(task.getId(), taskFound.getId());
