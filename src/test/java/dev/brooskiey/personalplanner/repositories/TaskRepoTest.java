@@ -17,7 +17,7 @@ import java.util.List;
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TaskRepoTest {
+class TaskRepoTest {
 
     @Autowired
     private TaskRepo taskRepo;
@@ -58,7 +58,7 @@ public class TaskRepoTest {
     // Save success
     @Test
     @Order(1)
-    public void saveTask_success() {
+    void saveTask_success() {
         task = taskRepo.save(task);
         Assertions.assertNotEquals(0, task.getId());
     }
@@ -66,7 +66,7 @@ public class TaskRepoTest {
     // Get task by id success
     @Test
     @Order(2)
-    public void getTaskById_success() {
+    void getTaskById_success() {
         Task taskFound = taskRepo.findById(task.getId());
         Assertions.assertNotNull(taskFound);
         Assertions.assertEquals(task.getId(), taskFound.getId());
@@ -74,22 +74,29 @@ public class TaskRepoTest {
 
     @Test
     @Order(3)
-    public void getTaskByDateInitiated_success(){
+    void getTaskByDateInitiated_success(){
         List<Task> tasks = taskRepo.findByDateInitiated(task.getDateInitiated());
         Assertions.assertTrue(tasks.size()>=1);
     }
 
     @Test
     @Order(4)
-    public void getTaskByRecurrenceId_success(){
+    void getTaskByRecurrenceId_success(){
         List<Task> tasks = taskRepo.findByRecurrenceId(recurrTask.getId());
+        Assertions.assertTrue(tasks.size()>=1);
+    }
+
+    @Test
+    @Order(4)
+    void getTaskByName_success(){
+        List<Task> tasks = taskRepo.findByName(task.getName());
         Assertions.assertTrue(tasks.size()>=1);
     }
 
     // Get all success
     @Test
     @Order(5)
-    public void getAllTasks_success() {
+    void getAllTasks_success() {
         List<Task> tasks = (List<Task>) taskRepo.findAll();
         Assertions.assertTrue(tasks.size()>=1);
     }
@@ -97,7 +104,7 @@ public class TaskRepoTest {
     // Update success
     @Test
     @Order(6)
-    public void updateTask_success() {
+    void updateTask_success() {
         TaskStatus taskStatus = new TaskStatus(2, "Completed");
         status = statusRepo.save(taskStatus);
 
@@ -113,8 +120,9 @@ public class TaskRepoTest {
     // delete success
     @Test
     @Order(7)
-    public void deleteTask_success() {
+    void deleteTask_success() {
         taskRepo.deleteById(task.getId());
+        Assertions.assertNull(taskRepo.findById(task.getId()));
     }
 
 }

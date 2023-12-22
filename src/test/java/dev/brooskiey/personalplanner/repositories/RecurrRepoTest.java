@@ -14,7 +14,7 @@ import java.util.List;
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class RecurrRepoTest {
+class RecurrRepoTest {
 
     @Autowired
     private RecurrTaskRepo recurrRepo;
@@ -32,7 +32,7 @@ public class RecurrRepoTest {
     // Save success
     @Test
     @Order(1)
-    public void saveRecurrTask_success() {
+    void saveRecurrTask_success() {
         recurrTask = recurrRepo.save(recurrTask);
         Assertions.assertNotEquals(0, recurrTask.getId());
     }
@@ -40,24 +40,33 @@ public class RecurrRepoTest {
     // Get task by id success
     @Test
     @Order(2)
-    public void getRecurrTaskById_success() {
+    void getRecurrTaskById_success() {
         RecurrTask recurrTaskFound = recurrRepo.findById(recurrTask.getId());
+        Assertions.assertNotNull(recurrTaskFound);
+        Assertions.assertEquals(recurrTask.getId(), recurrTaskFound.getId());
+    }
+
+    // Get task by id success
+    @Test
+    @Order(3)
+    void getRecurrTaskByName_success() {
+        RecurrTask recurrTaskFound = recurrRepo.findByName(recurrTask.getName());
         Assertions.assertNotNull(recurrTaskFound);
         Assertions.assertEquals(recurrTask.getId(), recurrTaskFound.getId());
     }
 
     // Get all success
     @Test
-    @Order(3)
-    public void getAllRecurrTask_success() {
+    @Order(4)
+    void getAllRecurrTask_success() {
         List<RecurrTask> tasks = (List<RecurrTask>) recurrRepo.findAll();
         Assertions.assertTrue(tasks.size()>=1);
     }
 
     // Update success
     @Test
-    @Order(4)
-    public void updateRecurrTask_success() {
+    @Order(5)
+    void updateRecurrTask_success() {
 
         recurrTask.setLastDate( new Date(System.currentTimeMillis()));
 
@@ -68,9 +77,10 @@ public class RecurrRepoTest {
 
     // delete success
     @Test
-    @Order(5)
-    public void deleteTask_success() {
+    @Order(6)
+    void deleteTask_success() {
         recurrRepo.deleteById(recurrTask.getId());
+        Assertions.assertNull(recurrRepo.findById(recurrTask.getId()));
     }
 
 }

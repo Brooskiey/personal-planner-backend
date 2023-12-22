@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface RecurrTaskRepo extends CrudRepository<RecurrTask, Long> {
 
     RecurrTask findById(long id);
+
+    RecurrTask findByName(String name);
 }

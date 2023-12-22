@@ -16,4 +16,5 @@ public interface TaskRepo extends CrudRepository<Task, Long> {
 
     List<Task> findByRecurrenceId(long id);
 
+    List<Task> findByName(String name);
 }
