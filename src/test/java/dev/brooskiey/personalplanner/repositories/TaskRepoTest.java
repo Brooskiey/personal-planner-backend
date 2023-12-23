@@ -82,7 +82,7 @@ class TaskRepoTest {
     @Test
     @Order(4)
     void getTaskByRecurrenceId_success(){
-        List<Task> tasks = taskRepo.findByRecurrenceId(recurrTask.getId());
+        List<Task> tasks = taskRepo.findByRecurrenceId(task.getRecurrence().getId());
         Assertions.assertTrue(tasks.size()>=1);
     }
 
@@ -123,6 +123,21 @@ class TaskRepoTest {
     void deleteTask_success() {
         taskRepo.deleteById(task.getId());
         Assertions.assertNull(taskRepo.findById(task.getId()));
+    }
+
+    // Teardown
+    @AfterAll
+    void teardown() {
+        taskRepo.deleteAll();
+        recurrRepo.deleteAll();
+        statusRepo.deleteAll();
+        typeRepo.deleteAll();
+
+        Assertions.assertEquals(0, ((List<Task>) taskRepo.findAll()).size());
+        Assertions.assertEquals(0, ((List<RecurrTask>) recurrRepo.findAll()).size());
+        Assertions.assertEquals(0, ((List<TaskStatus>) statusRepo.findAll()).size());
+        Assertions.assertEquals(0, ((List<TaskType>) typeRepo.findAll()).size());
+
     }
 
 }

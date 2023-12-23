@@ -60,7 +60,7 @@ class RecurrRepoTest {
     @Order(4)
     void getAllRecurrTask_success() {
         List<RecurrTask> tasks = (List<RecurrTask>) recurrRepo.findAll();
-        Assertions.assertTrue(tasks.size()>=1);
+        Assertions.assertNotEquals(0, tasks.size());
     }
 
     // Update success
@@ -81,6 +81,13 @@ class RecurrRepoTest {
     void deleteTask_success() {
         recurrRepo.deleteById(recurrTask.getId());
         Assertions.assertNull(recurrRepo.findById(recurrTask.getId()));
+    }
+
+    // Teardown
+    @AfterAll
+    void teardown() {
+        recurrRepo.deleteAll();
+        Assertions.assertEquals(0, ((List<RecurrTask>) recurrRepo.findAll()).size());
     }
 
 }
