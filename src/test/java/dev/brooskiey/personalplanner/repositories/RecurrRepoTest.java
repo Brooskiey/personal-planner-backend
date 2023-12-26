@@ -24,7 +24,7 @@ class RecurrRepoTest {
     // Setup for the tests
     @BeforeAll
     void setup() {
-        RecurrTask recurTask = new RecurrTask(1, "vacuum", new Date(System.currentTimeMillis()));
+        RecurrTask recurTask = new RecurrTask(1, "WEEKLY", "TUESDAY", new Date(System.currentTimeMillis()));
         recurrTask = recurrRepo.save(recurTask);
         Assertions.assertNotEquals(0, recurrTask.getId());
     }
@@ -50,7 +50,7 @@ class RecurrRepoTest {
     @Test
     @Order(3)
     void getRecurrTaskByName_success() {
-        RecurrTask recurrTaskFound = recurrRepo.findByName(recurrTask.getName());
+        RecurrTask recurrTaskFound = recurrRepo.findByRecurrence(recurrTask.getRecurrence());
         Assertions.assertNotNull(recurrTaskFound);
         Assertions.assertEquals(recurrTask.getId(), recurrTaskFound.getId());
     }

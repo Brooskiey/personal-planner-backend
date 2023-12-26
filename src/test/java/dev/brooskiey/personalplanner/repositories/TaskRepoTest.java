@@ -39,7 +39,7 @@ class TaskRepoTest {
     // Setup for the tests
     @BeforeAll
     void setup() {
-        RecurrTask recurTask = new RecurrTask(1, "vacuum", new Date(System.currentTimeMillis()));
+        RecurrTask recurTask = new RecurrTask(1, "WEEKLY", "TUESDAY", new Date(System.currentTimeMillis()));
         recurrTask = recurrRepo.save(recurTask);
         Assertions.assertNotEquals(0, recurrTask.getId());
 
@@ -72,6 +72,7 @@ class TaskRepoTest {
         Assertions.assertEquals(task.getId(), taskFound.getId());
     }
 
+    // Get task by date
     @Test
     @Order(3)
     void getTaskByDateInitiated_success(){
@@ -79,6 +80,7 @@ class TaskRepoTest {
         Assertions.assertTrue(tasks.size()>=1);
     }
 
+    // Get task by recurrence id
     @Test
     @Order(4)
     void getTaskByRecurrenceId_success(){
@@ -86,6 +88,7 @@ class TaskRepoTest {
         Assertions.assertTrue(tasks.size()>=1);
     }
 
+    // Get task by name
     @Test
     @Order(4)
     void getTaskByName_success(){
@@ -93,9 +96,17 @@ class TaskRepoTest {
         Assertions.assertTrue(tasks.size()>=1);
     }
 
-    // Get all success
+    // Get task by type
     @Test
     @Order(5)
+    void getTaskByType_success() {
+        List<Task> tasks = taskRepo.findByType(task.getType().getName());
+        Assertions.assertTrue(tasks.size()>=1);
+    }
+
+    // Get all success
+    @Test
+    @Order(6)
     void getAllTasks_success() {
         List<Task> tasks = (List<Task>) taskRepo.findAll();
         Assertions.assertTrue(tasks.size()>=1);
@@ -103,7 +114,7 @@ class TaskRepoTest {
 
     // Update success
     @Test
-    @Order(6)
+    @Order(7)
     void updateTask_success() {
         TaskStatus taskStatus = new TaskStatus(2, "Completed");
         status = statusRepo.save(taskStatus);
@@ -119,7 +130,7 @@ class TaskRepoTest {
 
     // delete success
     @Test
-    @Order(7)
+    @Order(8)
     void deleteTask_success() {
         taskRepo.deleteById(task.getId());
         Assertions.assertNull(taskRepo.findById(task.getId()));

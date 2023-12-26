@@ -9,5 +9,5 @@ public interface RecurrTaskRepo extends CrudRepository<RecurrTask, Long> {
 
     RecurrTask findById(long id);
 
-    RecurrTask findByName(String name);
+    RecurrTask findByRecurrence(String recurrence);
 }
