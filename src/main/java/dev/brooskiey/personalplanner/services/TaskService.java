@@ -22,12 +22,27 @@ public class TaskService {
 
     // Create task
     public Task createTask(Task newTask) throws FailedToCreateTask {
-        return null;
+        newTask.setId(0);
+        newTask.setComplete(false);
+        newTask.setDateCompleted(null);
+        if(isValidTask(newTask)) {
+            return taskRepo.save(newTask);
+        }
+        else {
+            throw new FailedToCreateTask("Failed to create: task is invalid");
+        }
     }
 
     // Get task by id
     public Task getTaskById(long id) throws FailedToGetTask {
-        return null;
+        if(id == 0) {
+            throw new FailedToGetTask("Failed to get task: id is bad");
+        }
+        Task task = taskRepo.findById(id);
+        if(task == null) {
+            throw new FailedToGetTask("Failed to get task: task does not exist");
+        }
+        return task;
     }
 
     // Get tasks by date
@@ -68,5 +83,19 @@ public class TaskService {
     // Delete task
     public String deleteTask(long id) {
         return null;
+    }
+
+    // Helper for determining the validity of the task
+    private boolean isValidTask(Task task) {
+        return task.getType() != null
+                && Type.contains(task.getType().getName())
+                && task.getName() != null
+                && !task.getName().equals("")
+                && task.getStatus() != null
+                && Status.contains(task.getStatus().getName())
+                && task.getRecurrence() != null
+                && Recurrence.contains(task.getRecurrence().getRecurrence())
+                && Category.contains(task.getRecurrence().getCategory())
+                && task.getDateInitiated() != null;
     }
 }
