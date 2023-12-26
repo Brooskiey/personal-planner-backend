@@ -19,15 +19,19 @@ public class RecurrTask {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "recurrence")
+    private String recurrence;
 
     @Column(name = "last_date")
     private Date lastDate;
 
-    public RecurrTask(long id, String name, Date lastDate) {
+    public RecurrTask(long id, String category, String recurrence, Date lastDate) {
         this.id = id;
-        this.name = name;
+        this.category = category;
+        this.recurrence = recurrence;
         this.lastDate = lastDate;
     }
 

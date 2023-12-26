@@ -1,9 +1,12 @@
 package dev.brooskiey.personalplanner.models;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.sql.Date;
+import java.util.Date;
+
 
 @Entity
 @Getter
