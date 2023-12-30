@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest(classes= PersonalPlannerBackendApplication.class)
@@ -39,7 +39,7 @@ class TaskRepoTest {
     // Setup for the tests
     @BeforeAll
     void setup() {
-        RecurrTask recurTask = new RecurrTask(1, "WEEKLY", "TUESDAY", new Date(System.currentTimeMillis()));
+        RecurrTask recurTask = new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28"));
         recurrTask = recurrRepo.save(recurTask);
         Assertions.assertNotEquals(0, recurrTask.getId());
 
@@ -52,7 +52,7 @@ class TaskRepoTest {
         Assertions.assertNotEquals(0, type.getId());
 
         task = new Task(0, "Test Task", type, status, recurrTask,
-                new Date(System.currentTimeMillis()), null, false);
+                LocalDate.parse("2023-12-28"), null, false);
     }
 
     // Save success

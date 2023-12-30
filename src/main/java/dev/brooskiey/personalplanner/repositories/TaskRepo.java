@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -13,7 +13,7 @@ public interface TaskRepo extends CrudRepository<Task, Long> {
 
     Task findById(long id);
 
-    List<Task> findByDateInitiated(Date date);
+    List<Task> findByDateInitiated(LocalDate date);
 
     List<Task> findByRecurrenceId(long id);
 

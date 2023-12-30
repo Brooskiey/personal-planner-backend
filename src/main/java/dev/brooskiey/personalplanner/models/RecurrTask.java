@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -26,9 +26,9 @@ public class RecurrTask {
     private String recurrence;
 
     @Column(name = "last_date")
-    private Date lastDate;
+    private LocalDate lastDate;
 
-    public RecurrTask(long id, String category, String recurrence, Date lastDate) {
+    public RecurrTask(long id, String category, String recurrence, LocalDate lastDate) {
         this.id = id;
         this.category = category;
         this.recurrence = recurrence;

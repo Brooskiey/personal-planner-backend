@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 
 @Entity
@@ -36,17 +36,17 @@ public class Task {
     private RecurrTask recurrence;
 
     @Column(name = "date_initiated", nullable = false)
-    private Date dateInitiated;
+    private LocalDate dateInitiated;
 
     @Column(name = "date_completed")
-    private Date dateCompleted;
+    private LocalDate dateCompleted;
 
     @Column(name = "is_complete", nullable = false)
     private boolean isComplete;
 
     public Task(long id, String name, TaskType type,
                 TaskStatus status, RecurrTask recurrence,
-                Date dateInitiated, Date dateCompleted,
+                LocalDate dateInitiated, LocalDate dateCompleted,
                 boolean isComplete) {
         this.id = id;
         this.name = name;
