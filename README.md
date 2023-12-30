@@ -14,7 +14,7 @@
     - Get task by id
   - GET `/tasks/week/{date}`
     - Get the important appointments for the week
-  - GET `/tasks/type/{type_id}`
+  - GET `/tasks/type/{type_name}`
     - Get tasks by type
   - POST `/tasks`
     - Body: 
@@ -22,15 +22,54 @@
     { 
     "task_id":"number",
     "name":"string",
-    "task_type_name":"string",
-    "status_name":"string",
-    "recurrence": "string",
-    "last_date_occurred": "Date",
-    "date_initiated":"Date",
-    "date_completed":"Date",
+    "task_type": {
+      "id": "number",
+      "name": "string"
+    },
+    "task_status": {
+      "id": "number",
+      "name": "string"
+    },
+    "task_recurrence":{ 
+      "id": "number",
+      "category":"string",
+      "recurrence": "string",
+      "last_date": "LocalDate"
+    },
+    "date_initiated":"LocalDate",
+    "date_completed":"LocalDate",
     "is_complete":"boolean"
     }
     ```
+  - PUT `/tasks` 
+    - Body:
+    ```json
+    { 
+    "task_id":"number",
+    "name":"string",
+    "task_type": {
+      "id": "number",
+      "name": "string"
+    },
+    "task_status": {
+      "id": "number",
+      "name": "string"
+    },
+    "task_recurrence":{ 
+      "id": "number",
+      "category":"string",
+      "recurrence": "string",
+      "last_date": "LocalDate"
+    },
+    "date_initiated":"LocalDate",
+    "date_completed":"LocalDate",
+    "is_complete":"boolean"
+    }
+    ```
+  - PUT `/tasks/complete/{id}`
+    - Complete the task
+  - DELETE `/tasks/{id}`
+    - Delete the task
   
 ## Database
 - TASK
@@ -39,9 +78,8 @@
   - type_id:number (Foreign Key)
   - status_id:number (Foreign Key)
   - recurr_id:number (Foreign Key)
-  - last_date_occurred:Date
-  - date_initiated:Date
-  - date_completed:Date
+  - date_initiated:LocalDate
+  - date_completed:LocalDate
   - is_complete:boolean
 - TASK_TYPE
   - id:number (Primary Key)
@@ -51,5 +89,6 @@
   - name:string
 - RECURR_TASK
   - id:number (Primary Key)
+  - category:string
   - recurrence:string
-  - last_date:Date
+  - last_date:LocalDate
