@@ -33,6 +33,7 @@ public class TaskService {
         newTask.setId(0);
         newTask.setComplete(false);
         newTask.setDateCompleted(null);
+        newTask.setDateInitiated(new Date(System.currentTimeMillis()).toLocalDate());
         if(isValidTask(newTask)) {
             return taskRepo.save(newTask);
         }
@@ -80,7 +81,7 @@ public class TaskService {
     }
 
     // Update status
-    public Task updateTaskStatus(Task task) throws FailedToUpdateTask {
+    public Task updateTask(Task task) throws FailedToUpdateTask {
         isUpdateValid(task);
         return taskRepo.save(task);
     }

@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes= PersonalPlannerBackendApplication.class)
@@ -75,10 +76,21 @@ class TaskServiceTest {
     // Success: correct
     @Test
     void createTask_Correct_Success() throws FailedToCreateTask {
-        when(taskRepo.save(task)).thenReturn(savedTask);
+        when(taskRepo.save(any())).thenReturn(savedTask);
 
         Task newTask = service.createTask(task);
         Assertions.assertNotEquals(0, newTask.getId());
+    }
+
+    // Success: null date initiated
+    @Test
+    void createTask_NullInitiateDate_Failure() {
+        when(taskRepo.save(any())).thenReturn(savedTask);
+
+        task.setDateInitiated(null);
+
+        Task newTask = service.createTask(task);
+        Assertions.assertNotNull(newTask.getDateInitiated());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,24 +259,6 @@ class TaskServiceTest {
                 "Failed to create: task is invalid");
     }
 
-    // Failed: null date initiated
-    @Test
-    void createTask_NullInitiateDate_Failure() {
-        Task failTask = new Task(0,
-                "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
-                null,
-                null,
-                false);
-
-        Assertions.assertThrows(
-                FailedToCreateTask.class,
-                () -> service.createTask(failTask),
-                "Failed to create: task is invalid");
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////             Get Task By Id SUCCESS         ////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -272,7 +266,7 @@ class TaskServiceTest {
     // Get Task by Id Success
     @Test
     void getTaskById_Correct_Success() {
-        when(taskRepo.findById(1)).thenReturn(savedTask);
+        when(taskRepo.findById(anyLong())).thenReturn(savedTask);
 
         Assertions.assertDoesNotThrow(() -> service.getTaskById(1));
     }
@@ -293,7 +287,7 @@ class TaskServiceTest {
     // Failed: id doesn't exist
     @Test
     void getTaskById_IdDoesNotExist_Failure() {
-        when(taskRepo.findById(1)).thenReturn(null);
+        when(taskRepo.findById(anyLong())).thenReturn(null);
 
         Assertions.assertThrows(
                 FailedToGetTask.class,
@@ -311,7 +305,7 @@ class TaskServiceTest {
         List<Task> tasks = new ArrayList<>();
         tasks.add(savedTask);
 
-        when(taskRepo.findByDateInitiated(task.getDateInitiated())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
 
         List<Task> foundTasks = service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
 
@@ -323,7 +317,7 @@ class TaskServiceTest {
     void getTaskByDate_ZeroTask_Success() throws FailedToGetTask {
         List<Task> tasks = new ArrayList<>();
 
-        when(taskRepo.findByDateInitiated(task.getDateInitiated())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
 
         List<Task> foundTasks = service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
 
@@ -335,7 +329,7 @@ class TaskServiceTest {
     void getTaskByDate_DoesNotThrowError_Success() {
         List<Task> tasks = new ArrayList<>();
 
-        when(taskRepo.findByDateInitiated(task.getDateInitiated())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
 
         Assertions.assertDoesNotThrow(() -> service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE)));
     }
@@ -372,7 +366,7 @@ class TaskServiceTest {
         List<Task> tasks = new ArrayList<>();
         tasks.add(savedTask);
 
-        when(taskRepo.findByType(task.getType().getName())).thenReturn(tasks);
+        when(taskRepo.findByType(anyString())).thenReturn(tasks);
 
         List<Task> foundTasks = service.getTasksByType(task.getType().getName());
 
@@ -389,7 +383,7 @@ class TaskServiceTest {
         task.setType(new TaskType(2,"TASK TEST FAIL"));
 
         Assertions.assertThrows(FailedToGetTask.class,
-                () -> service.getTasksByType(task.getType().getName()),
+                () -> service.getTasksByType("TASK TEST FAIL"),
                 "Failed to get task: Type is invalid: TASK TEST FAIL");
     }
 
@@ -438,14 +432,14 @@ class TaskServiceTest {
 
     // Success: Correct Status
     @Test
-    void updateTaskStatus_Correct_Success() throws FailedToUpdateTask {
+    void updateTask_Correct_Success() throws FailedToUpdateTask {
         task.setStatus(new TaskStatus(2, "Completed"));
         savedTask.setStatus(new TaskStatus(2, "Completed"));
 
-        when(taskRepo.save(task)).thenReturn(savedTask);
-        when(taskRepo.existsById(task.getId())).thenReturn(true);
+        when(taskRepo.save(any())).thenReturn(savedTask);
+        when(taskRepo.existsById(anyLong())).thenReturn(true);
 
-        Task newTask = service.updateTaskStatus(task);
+        Task newTask = service.updateTask(task);
         Assertions.assertEquals(task.getStatus().getName(), newTask.getStatus().getName());
     }
 
@@ -455,7 +449,7 @@ class TaskServiceTest {
 
     // Failed: Type null
     @Test
-    void updateTaskStatus_NullType_Failure() {
+    void updateTask_NullType_Failure() {
         Task failTask = new Task(0,
                 "Test Task",
                 null,
@@ -467,13 +461,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Type doesn't exist
     @Test
-    void updateTaskStatus_TypeNotExist_Failure() {
+    void updateTask_TypeNotExist_Failure() {
         Task failTask = new Task(0,
                 "Test Task",
                 new TaskType(3, "TEST"),
@@ -485,13 +479,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Name null
     @Test
-    void updateTaskStatus_NullName_Failure() {
+    void updateTask_NullName_Failure() {
         Task failTask = new Task(0,
                 null,
                 new TaskType(1, "Cleaning"),
@@ -503,13 +497,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Empty String Name
     @Test
-    void updateTaskStatus_EmptyStringName_Failure() {
+    void updateTask_EmptyStringName_Failure() {
         Task failTask = new Task(0,
                 "",
                 new TaskType(1, "Cleaning"),
@@ -521,13 +515,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Status null
     @Test
-    void updateTaskStatus_NullStatus_Failure() {
+    void updateTask_NullStatus_Failure() {
         Task failTask = new Task(0,
                 "test task",
                 new TaskType(1, "Cleaning"),
@@ -539,13 +533,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Status doesn't exist
     @Test
-    void updateTaskStatus_StatusNotExist_Failure() {
+    void updateTask_StatusNotExist_Failure() {
         Task failTask = new Task(0,
                 "test task",
                 new TaskType(1, "Cleaning"),
@@ -557,13 +551,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: null recurrence
     @Test
-    void updateTaskStatus_NullRecurrence_Failure() {
+    void updateTask_NullRecurrence_Failure() {
         Task failTask = new Task(0,
                 "test task",
                 new TaskType(1, "Cleaning"),
@@ -575,13 +569,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Recurrence doesn't exist
     @Test
-    void updateTaskStatus_RecurrenceNotExist_Failure() {
+    void updateTask_RecurrenceNotExist_Failure() {
         Task failTask = new Task(0,
                 "test task",
                 new TaskType(1, "Cleaning"),
@@ -593,13 +587,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: null date initiated
     @Test
-    void updateTaskStatus_NullInitiateDate_Failure() {
+    void updateTask_NullInitiateDate_Failure() {
         Task failTask = new Task(0,
                 "test task",
                 new TaskType(1, "Cleaning"),
@@ -611,13 +605,13 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
     // Failed: task doesn't exist
     @Test
-    void updateTaskStatus_taskNotExist_Failure() {
+    void updateTask_taskNotExist_Failure() {
         Task failTask = new Task(0,
                 "test task",
                 new TaskType(1, "Cleaning"),
@@ -628,11 +622,11 @@ class TaskServiceTest {
                 false);
 
 
-        when(taskRepo.existsById(task.getId())).thenReturn(false);
+        when(taskRepo.existsById(anyLong())).thenReturn(false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTaskStatus(failTask),
+                () -> service.updateTask(failTask),
                 "Failed to update: task is invalid");
     }
 
@@ -647,9 +641,9 @@ class TaskServiceTest {
         savedTask.setDateCompleted(new Date(System.currentTimeMillis()).toLocalDate());
         savedTask.setStatus(new TaskStatus(1,"COMPLETED"));
 
-        when(taskRepo.findById(task.getId())).thenReturn(savedTask);
-        when(statusRepo.findByName("COMPLETED")).thenReturn(new TaskStatus(1,"COMPLETED"));
-        when(taskRepo.save(savedTask)).thenReturn(savedTask);
+        when(taskRepo.findById(anyLong())).thenReturn(savedTask);
+        when(statusRepo.findByName(anyString())).thenReturn(new TaskStatus(1,"COMPLETED"));
+        when(taskRepo.save(any())).thenReturn(savedTask);
 
         Task newTask = service.complete(task.getId());
 
@@ -677,7 +671,7 @@ class TaskServiceTest {
     // Success: delete task
     @Test
     void deleteTask_Correct_Success() throws FailedToDeleteTask {
-        when(taskRepo.existsById(task.getId())).thenReturn(false);
+        when(taskRepo.existsById(anyLong())).thenReturn(false);
 
         String deleted = service.deleteTask(task.getId());
         Assertions.assertEquals("Successfully Deleted", deleted);
@@ -691,10 +685,10 @@ class TaskServiceTest {
     // Failed: delete task
     @Test
     void deleteTask_DidNotDelete_Failure() {
-        when(taskRepo.existsById(task.getId())).thenReturn(true);
+        when(taskRepo.existsById(anyLong())).thenReturn(true);
 
         Assertions.assertThrows(FailedToDeleteTask.class,
-                () -> service.deleteTask(task.getId()),
+                () -> service.deleteTask(0),
                 "Failed to delete task");
 
     }

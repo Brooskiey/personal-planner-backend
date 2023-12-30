@@ -1,10 +1,6 @@
 package dev.brooskiey.personalplanner.exceptions;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-public class FailedToGetTask extends Exception {
+public class FailedToGetTask extends RuntimeException {
 
     public FailedToGetTask(String message) {
         super(message);

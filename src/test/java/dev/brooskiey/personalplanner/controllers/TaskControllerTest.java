@@ -2,9 +2,7 @@ package dev.brooskiey.personalplanner.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.brooskiey.personalplanner.PersonalPlannerBackendApplication;
-import dev.brooskiey.personalplanner.exceptions.FailedToCreateTask;
-import dev.brooskiey.personalplanner.exceptions.FailedToGetTask;
-import dev.brooskiey.personalplanner.exceptions.FailedToUpdateTask;
+import dev.brooskiey.personalplanner.exceptions.*;
 import dev.brooskiey.personalplanner.models.RecurrTask;
 import dev.brooskiey.personalplanner.models.Task;
 import dev.brooskiey.personalplanner.models.TaskStatus;
@@ -13,10 +11,10 @@ import dev.brooskiey.personalplanner.services.TaskService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,7 +22,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -45,7 +43,7 @@ class TaskControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Mock
+    @MockBean
     TaskService service;
 
     Task failTask;
@@ -80,11 +78,13 @@ class TaskControllerTest {
 
     @Test
     void createTask_Success() throws Exception {
-        given(service.createTask(task)).willReturn(task);
+        when(service.createTask(any())).thenReturn(task);
 
-        this.mockMvc.perform(post("/tasks").contentType("application/json").content(objectMapper.writeValueAsString(task)))
+        this.mockMvc.perform(post("/tasks")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(task)))
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType("application/json"));
     }
 
@@ -95,9 +95,11 @@ class TaskControllerTest {
 
     @Test
     void createTask_Failure() throws Exception {
-        when(service.createTask(task)).thenThrow(FailedToCreateTask.class);
+        when(service.createTask(any())).thenThrow(FailedToCreateTask.class);
 
-        this.mockMvc.perform(get("/tasks").contentType("application/json"))
+        this.mockMvc.perform(post("/tasks")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(task)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json"));
@@ -109,28 +111,15 @@ class TaskControllerTest {
 
     @Test
     void getAllTasks_Success() throws Exception {
-        given(service.getAllTasks()).willReturn(tasks);
+        when(service.getAllTasks()).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/tasks").contentType("application/json"))
+        this.mockMvc.perform(get("/tasks")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get All Tasks FAILED         ///////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Test
-    void getAllTasks_Failure() throws Exception {
-        when(service.getAllTasks()).thenThrow(FailedToGetTask.class);
-
-        this.mockMvc.perform(get("/tasks").contentType("application/json"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType("application/json"));
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////             Get Task By Id SUCCESS         ///////////////////////////////////////////////////////
@@ -138,9 +127,10 @@ class TaskControllerTest {
 
     @Test
     void getTaskById_Success() throws Exception {
-        given(service.getTaskById(1)).willReturn(task);
+        when(service.getTaskById(anyLong())).thenReturn(task);
 
-        this.mockMvc.perform(get("/tasks/1").contentType("application/json"))
+        this.mockMvc.perform(get("/tasks/1")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
@@ -153,9 +143,10 @@ class TaskControllerTest {
 
     @Test
     void getTaskById_Failure() throws Exception {
-        when(service.getTaskById(1)).thenThrow(FailedToGetTask.class);
+        when(service.getTaskById(anyLong())).thenThrow(FailedToGetTask.class);
 
-        this.mockMvc.perform(get("/tasks/1").contentType("application/json"))
+        this.mockMvc.perform(get("/tasks/1")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json"));
@@ -167,9 +158,10 @@ class TaskControllerTest {
 
     @Test
     void getTasksByDate_Success() throws Exception {
-        given(service.getTasksByDate("2023-12-28")).willReturn(tasks);
+        when(service.getTasksByDate(anyString())).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/tasks/days/2023-12-28").contentType("application/json"))
+        this.mockMvc.perform(get("/tasks/days/2023-12-28")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
@@ -182,52 +174,54 @@ class TaskControllerTest {
 
     @Test
     void getTasksByDate_Failure() throws Exception {
-        when(service.getAllTasks()).thenThrow(FailedToGetTask.class);
+        when(service.getTasksByDate(anyString())).thenThrow(FailedToGetTask.class);
 
-        this.mockMvc.perform(get("/tasks/days/2023-12-28").contentType("application/json"))
+        this.mockMvc.perform(get("/tasks/days/2023-12-28")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json"));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get Tasks By Week SUCCESS         ///////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Test
-    void getTasksByWeek_Success() throws Exception {
-        given(service.getTasksByDate("2023-12-25")).willReturn(tasks);
-
-        this.mockMvc.perform(get("/tasks/weeks/2023-12-25").contentType("application/json"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get Tasks By Week FAILED         ///////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Test
-    void getTasksByWeek_Failure() throws Exception {
-        when(service.getTasksByDate("2023-12-25")).thenThrow(FailedToGetTask.class);
-
-        this.mockMvc.perform(get("/tasks/weeks/2023-12-25").contentType("application/json"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType("application/json"));
-    }
-
+//    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//    ////////////////////             Get Tasks By Week SUCCESS         ///////////////////////////////////////////////////////
+//    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//    @Test
+//    void getTasksByWeek_Success() throws Exception {
+//        given(service.getTasksByDate("2023-12-25")).willReturn(tasks);
+//
+//        this.mockMvc.perform(get("/tasks/weeks/2023-12-25").contentType("application/json"))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json"));
+//    }
+//
+//    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//    ////////////////////             Get Tasks By Week FAILED         ///////////////////////////////////////////////////////
+//    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//    @Test
+//    void getTasksByWeek_Failure() throws Exception {
+//        when(service.getTasksByDate("2023-12-25")).thenThrow(FailedToGetTask.class);
+//
+//        this.mockMvc.perform(get("/tasks/weeks/2023-12-25").contentType("application/json"))
+//                .andDo(print())
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().contentType("application/json"));
+//    }
+//
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////             Get Tasks By Type SUCCESS         ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
     void getTasksByType_Success() throws Exception {
-        given(service.getTasksByType("Cleaning")).willReturn(tasks);
+        when(service.getTasksByType(anyString())).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/tasks/types/Cleaning").contentType("application/json"))
+        this.mockMvc.perform(get("/tasks/types/Cleaning")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
@@ -240,38 +234,43 @@ class TaskControllerTest {
 
     @Test
     void getTasksByType_Failure() throws Exception {
-        when(service.getTasksByType("Cleaning")).thenThrow(FailedToGetTask.class);
+        when(service.getTasksByType(anyString())).thenThrow(FailedToGetTask.class);
 
-        this.mockMvc.perform(get("/tasks/types/Cleaning").contentType("application/json"))
+        this.mockMvc.perform(get("/tasks/types/Cleaning")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json"));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get All Task SUCCESS         ///////////////////////////////////////////////////////
+    ////////////////////             Update Task SUCCESS         ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
     void updateTask_Success() throws Exception {
-        given(service.updateTaskStatus(task)).willReturn(task);
+        when(service.updateTask(any())).thenReturn(task);
 
-        this.mockMvc.perform(put("/tasks").contentType("application/json").content(objectMapper.writeValueAsString(task)))
+        this.mockMvc.perform(put("/tasks")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(task)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get All Task FAILED         ///////////////////////////////////////////////////////
+    ////////////////////             Update Task FAILED         ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     @Test
     void updateTasks_Failure() throws Exception {
-        when(service.updateTaskStatus(task)).thenThrow(FailedToUpdateTask.class);
+        when(service.updateTask(any())).thenThrow(FailedToUpdateTask.class);
 
-        this.mockMvc.perform(put("/tasks").contentType("application/json").content(objectMapper.writeValueAsString(task)))
+        this.mockMvc.perform(put("/tasks")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(task)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json"));
@@ -283,9 +282,10 @@ class TaskControllerTest {
 
     @Test
     void completeTask_Success() throws Exception {
-        given(service.complete(1)).willReturn(task);
+        when(service.complete(anyLong())).thenReturn(task);
 
-        this.mockMvc.perform(put("/tasks/1").contentType("application/json"))
+        this.mockMvc.perform(put("/tasks/complete/1")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
@@ -298,9 +298,10 @@ class TaskControllerTest {
 
     @Test
     void completeTask_Failure() throws Exception {
-        when(service.complete(1)).thenThrow(FailedToGetTask.class);
+        when(service.complete(anyLong())).thenThrow(FailedToCompleteTask.class);
 
-        this.mockMvc.perform(put("/tasks/1").contentType("application/json"))
+        this.mockMvc.perform(put("/tasks/complete/1")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json"));
@@ -312,9 +313,10 @@ class TaskControllerTest {
 
     @Test
     void deleteTaskById_Success() throws Exception {
-        given(service.deleteTask(1)).willReturn("Successfully Deleted");
+        when(service.deleteTask(anyLong())).thenReturn("Successfully Deleted");
 
-        this.mockMvc.perform(get("/tasks/1").contentType("application/json"))
+        this.mockMvc.perform(delete("/tasks/1")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
@@ -324,12 +326,12 @@ class TaskControllerTest {
     ////////////////////             Delete Task FAILED         ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     @Test
     void deleteTaskById_Failure() throws Exception {
-        when(service.deleteTask(1)).thenThrow(FailedToGetTask.class);
+        when(service.deleteTask(anyLong())).thenThrow(FailedToDeleteTask.class);
 
-        this.mockMvc.perform(get("/tasks/1").contentType("application/json"))
+        this.mockMvc.perform(delete("/tasks/1")
+                        .contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json"));

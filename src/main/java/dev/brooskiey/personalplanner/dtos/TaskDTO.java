@@ -16,7 +16,6 @@ public class TaskDTO {
     private RecurrTaskDTO recurrence;
     private LocalDate dateInitiated;
     private LocalDate dateCompleted;
-    private LocalDate lastDateOccurred;
     private boolean isComplete;
 
 }
