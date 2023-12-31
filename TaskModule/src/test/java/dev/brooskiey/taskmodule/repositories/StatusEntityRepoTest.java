@@ -1,7 +1,7 @@
 package dev.brooskiey.taskmodule.repositories;
 
 import dev.brooskiey.taskmodule.TaskModuleApplication;
-import dev.brooskiey.taskmodule.models.TaskStatus;
+import dev.brooskiey.taskmodule.models.StatusEntity;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,17 +13,17 @@ import java.util.List;
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TaskStatusRepoTest {
+class StatusEntityRepoTest {
 
     @Autowired
-    TaskStatusRepo statusRepo;
+    StatusRepo statusRepo;
 
-    TaskStatus status;
+    StatusEntity status;
 
     // Setup for the tests
     @BeforeAll
     void setup() {
-        status = new TaskStatus(0, "not started");
+        status = new StatusEntity(0, "not started");
     }
 
     // Save the status
@@ -38,24 +38,24 @@ class TaskStatusRepoTest {
     @Order(2)
     @Test
     void findById_Success() {
-        TaskStatus foundStatus = statusRepo.findById(status.getId());
-        Assertions.assertEquals(status.getId(), foundStatus.getId());
+        StatusEntity foundStatusEntity = statusRepo.findById(status.getId());
+        Assertions.assertEquals(status.getId(), foundStatusEntity.getId());
     }
 
     // Find status by name
     @Order(3)
     @Test
     void findByName_Success() {
-        TaskStatus foundStatus = statusRepo.findByName(status.getName());
-        Assertions.assertEquals(status.getName(), foundStatus.getName());
+        StatusEntity foundStatusEntity = statusRepo.findByName(status.getName());
+        Assertions.assertEquals(status.getName(), foundStatusEntity.getName());
     }
 
     // Find all statuses
     @Order(4)
     @Test
     void findAll_Success() {
-        List<TaskStatus> statuses = (List<TaskStatus>) statusRepo.findAll();
-        Assertions.assertNotEquals(0, statuses.size());
+        List<StatusEntity> statusEntities = (List<StatusEntity>) statusRepo.findAll();
+        Assertions.assertNotEquals(0, statusEntities.size());
     }
 
     // Update a status
@@ -63,8 +63,8 @@ class TaskStatusRepoTest {
     @Test
     void updateStatus_Success() {
         status.setName("COMPLETED");
-        TaskStatus updatedStatus = statusRepo.save(status);
-        Assertions.assertNotEquals("not started", updatedStatus.getName());
+        StatusEntity updatedStatusEntity = statusRepo.save(status);
+        Assertions.assertNotEquals("not started", updatedStatusEntity.getName());
     }
 
     // Delete a status
@@ -72,14 +72,14 @@ class TaskStatusRepoTest {
     @Test
     void deleteStatus_Success() {
         statusRepo.deleteById(status.getId());
-        List<TaskStatus> statuses = (List<TaskStatus>) statusRepo.findAll();
-        Assertions.assertEquals(0, statuses.size());
+        List<StatusEntity> statusEntities = (List<StatusEntity>) statusRepo.findAll();
+        Assertions.assertEquals(0, statusEntities.size());
     }
 
     // Teardown
     @AfterAll
     void teardown() {
         statusRepo.deleteAll();
-        Assertions.assertEquals(0, ((List<TaskStatus>) statusRepo.findAll()).size());
+        Assertions.assertEquals(0, ((List<StatusEntity>) statusRepo.findAll()).size());
     }
 }

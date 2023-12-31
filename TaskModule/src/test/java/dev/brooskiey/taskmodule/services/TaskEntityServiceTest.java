@@ -2,12 +2,9 @@ package dev.brooskiey.taskmodule.services;
 
 import dev.brooskiey.taskmodule.TaskModuleApplication;
 import dev.brooskiey.taskmodule.exceptions.*;
-import dev.brooskiey.taskmodule.models.RecurrTask;
-import dev.brooskiey.taskmodule.models.Task;
-import dev.brooskiey.taskmodule.models.TaskStatus;
-import dev.brooskiey.taskmodule.models.TaskType;
+import dev.brooskiey.taskmodule.models.*;
+import dev.brooskiey.taskmodule.repositories.StatusRepo;
 import dev.brooskiey.taskmodule.repositories.TaskRepo;
-import dev.brooskiey.taskmodule.repositories.TaskStatusRepo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,188 +29,189 @@ import static org.mockito.Mockito.when;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
-class TaskServiceTest {
+class TaskEntityServiceTest {
 
     @Mock
     TaskRepo taskRepo;
 
     @Mock
-    TaskStatusRepo statusRepo;
+    StatusRepo statusRepo;
 
     @InjectMocks
     TaskService service;
 
-    Task task;
-    Task savedTask;
+    TaskEntity task;
+    TaskEntity savedTaskEntity;
 
     // Set up
     @BeforeAll
     void setup() {
-        RecurrTask recurrTask = new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28"));
-
-        TaskStatus status = new TaskStatus(1, "not started");
-        TaskType type = new TaskType(1, "Cleaning");
-        task = new Task(0, "Test Task", type, status, recurrTask,
+        CategoryEntity category = new CategoryEntity(1, "WEEKLY");
+        RecurrenceEntity recurrence = new RecurrenceEntity(1, category, "TUESDAY", LocalDate.parse("2023-12-28"));
+        StatusEntity status = new StatusEntity(1, "not started");
+        TypeEntity type = new TypeEntity(1, "Cleaning");
+        task = new TaskEntity(0, "Test TaskEntity", type, status, recurrence,
                 LocalDate.parse("2023-12-27"), null, false);
-        savedTask = new Task(1, "Test Task", type, status, recurrTask,
+        savedTaskEntity = new TaskEntity(1, "Test TaskEntity", type, status, recurrence,
                 LocalDate.parse("2023-12-28"), null, false);
 
     }
 
     @BeforeEach
     void beforeEach() {
-        RecurrTask recurrTask = new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28"));
-
-        TaskStatus status = new TaskStatus(1, "not started");
-        TaskType type = new TaskType(1, "Cleaning");
-        task = new Task(0, "Test Task", type, status, recurrTask,
+        CategoryEntity category = new CategoryEntity(1, "WEEKLY");
+        RecurrenceEntity recurrence = new RecurrenceEntity(1, category, "TUESDAY", LocalDate.parse("2023-12-28"));
+        
+        StatusEntity status = new StatusEntity(1, "not started");
+        TypeEntity type = new TypeEntity(1, "Cleaning");
+        task = new TaskEntity(0, "Test TaskEntity", type, status, recurrence,
                 LocalDate.parse("2023-12-27"), null, false);
 
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Create Task SUCCESS         ///////////////////////////////////////////////////////
+    ////////////////////             Create TaskEntity SUCCESS         ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Success: correct
     @Test
     void createTask_Correct_Success() throws FailedToCreateTask {
-        when(taskRepo.save(any())).thenReturn(savedTask);
+        when(taskRepo.save(any())).thenReturn(savedTaskEntity);
 
-        Task newTask = service.createTask(task);
+        TaskEntity newTask = service.createTask(task);
         Assertions.assertNotEquals(0, newTask.getId());
     }
 
     // Success: null date initiated
     @Test
     void createTask_NullInitiateDate_Failure() {
-        when(taskRepo.save(any())).thenReturn(savedTask);
+        when(taskRepo.save(any())).thenReturn(savedTaskEntity);
 
         task.setDateInitiated(null);
 
-        Task newTask = service.createTask(task);
+        TaskEntity newTask = service.createTask(task);
         Assertions.assertNotNull(newTask.getDateInitiated());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Create Task FAILED         ////////////////////////////////////////////////////////
+    ////////////////////             Create TaskEntity FAILED         ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Failed: null type
     @Test
     void createTask_NullType_Failure() {
-        Task failTask = new Task(0,
-                "Test Task",
+        TaskEntity failTaskEntity = new TaskEntity(0,
+                "Test TaskEntity",
                 null,
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
-    // Failed: Type doesn't exist
+    // Failed: TypeEntity doesn't exist
     @Test
     void createTask_TypeNotExist_Failure() {
-        Task failTask = new Task(0,
-                "Test Task",
-                new TaskType(3, "TEST"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+        TaskEntity failTaskEntity = new TaskEntity(0,
+                "Test TaskEntity",
+                new TypeEntity(3, "TEST"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
     // Failed: null name
     @Test
     void createTask_NullName_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 null,
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
     // Failed: empty String name
     @Test
     void createTask_EmptyStringName_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
     // Failed: null status
     @Test
     void createTask_NullStatus_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
+                new TypeEntity(1, "Cleaning"),
                 null,
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
-    // Failed: Status doesn't exist
+    // Failed: StatusEntity doesn't exist
     @Test
     void createTask_StatusNotExist_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(3, "TEST"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(3, "TEST"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
     // Failed: null recurrence
     @Test
     void createTask_NullRecurrence_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
                 null,
                 LocalDate.parse("2023-12-28"),
                 null,
@@ -221,60 +219,60 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
-    // Failed: Recurrence doesn't exist
+    // Failed: RecurrenceEntity doesn't exist
     @Test
     void createTask_RecurrenceNotExist_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(3, "TEST", "TEST", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(3, new CategoryEntity(1, "WEEKLY"), "TEST", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
     // Failed: Category doesn't exist
     @Test
     void createTask_CategoryNotExist_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(3, "TEST", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(3, new CategoryEntity(1, "TEST"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToCreateTask.class,
-                () -> service.createTask(failTask),
+                () -> service.createTask(failTaskEntity),
                 "Failed to create: task is invalid");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get Task By Id SUCCESS         ////////////////////////////////////////////////////
+    ////////////////////             Get TaskEntity By Id SUCCESS         ////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Get Task by Id Success
+    // Get TaskEntity by Id Success
     @Test
     void getTaskById_Correct_Success() {
-        when(taskRepo.findById(anyLong())).thenReturn(savedTask);
+        when(taskRepo.findById(anyLong())).thenReturn(savedTaskEntity);
 
         Assertions.assertDoesNotThrow(() -> service.getTaskById(1));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get Task By Id FAILED         /////////////////////////////////////////////////////
+    ////////////////////             Get TaskEntity By Id FAILED         /////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Failed: id is 0
@@ -304,34 +302,34 @@ class TaskServiceTest {
     // Success: 1 task
     @Test
     void getTaskByDate_OneTasks_Success() throws FailedToGetTask {
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(savedTask);
+        List<TaskEntity> taskEntities = new ArrayList<>();
+        taskEntities.add(savedTaskEntity);
 
-        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(taskEntities);
 
-        List<Task> foundTasks = service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
+        List<TaskEntity> foundTaskEntities = service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
 
-        Assertions.assertNotEquals(0, foundTasks.size());
+        Assertions.assertNotEquals(0, foundTaskEntities.size());
     }
 
     // Success: 0 tasks
     @Test
     void getTaskByDate_ZeroTask_Success() throws FailedToGetTask {
-        List<Task> tasks = new ArrayList<>();
+        List<TaskEntity> taskEntities = new ArrayList<>();
 
-        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(taskEntities);
 
-        List<Task> foundTasks = service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
+        List<TaskEntity> foundTaskEntities = service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
 
-        Assertions.assertEquals(0, foundTasks.size());
+        Assertions.assertEquals(0, foundTaskEntities.size());
     }
 
     // Success: does not throw error
     @Test
     void getTaskByDate_DoesNotThrowError_Success() {
-        List<Task> tasks = new ArrayList<>();
+        List<TaskEntity> taskEntities = new ArrayList<>();
 
-        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(taskEntities);
 
         Assertions.assertDoesNotThrow(() -> service.getTasksByDate(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE)));
     }
@@ -366,34 +364,34 @@ class TaskServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"2023-12-25","2023-12-26","2023-12-27","2023-12-28","2023-12-29","2023-12-30","2023-12-31"})
     void getTaskByWeek_MondayTasks_Success(String day) throws FailedToGetTask {
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(savedTask);
+        List<TaskEntity> taskEntities = new ArrayList<>();
+        taskEntities.add(savedTaskEntity);
 
-        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(taskEntities);
 
-        List<Task> foundTasks = service.getTasksByWeek(day);
+        List<TaskEntity> foundTaskEntities = service.getTasksByWeek(day);
 
-        Assertions.assertEquals(7, foundTasks.size());
+        Assertions.assertEquals(7, foundTaskEntities.size());
     }
 
     // Success: 0 tasks
     @Test
     void getTaskByWeek_ZeroTask_Success() throws FailedToGetTask {
-        List<Task> tasks = new ArrayList<>();
+        List<TaskEntity> taskEntities = new ArrayList<>();
 
-        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(taskEntities);
 
-        List<Task> foundTasks = service.getTasksByWeek(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
+        List<TaskEntity> foundTaskEntities = service.getTasksByWeek(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
 
-        Assertions.assertEquals(0, foundTasks.size());
+        Assertions.assertEquals(0, foundTaskEntities.size());
     }
 
     // Success: does not throw error
     @Test
     void getTaskByWeek_DoesNotThrowError_Success() {
-        List<Task> tasks = new ArrayList<>();
+        List<TaskEntity> taskEntities = new ArrayList<>();
 
-        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+        when(taskRepo.findByDateInitiated(any())).thenReturn(taskEntities);
 
         Assertions.assertDoesNotThrow(() -> service.getTasksByWeek(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE)));
     }
@@ -421,44 +419,44 @@ class TaskServiceTest {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get Tasks By Type SUCCESS         /////////////////////////////////////////////////
+    ////////////////////             Get Tasks By TypeEntity SUCCESS         /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Success: Get Tasks by Type
+    // Success: Get Tasks by TypeEntity
     @Test
     void getTasksByType_Correct_Success() throws FailedToGetTask {
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(savedTask);
+        List<TaskEntity> taskEntities = new ArrayList<>();
+        taskEntities.add(savedTaskEntity);
 
-        when(taskRepo.findByType(anyString())).thenReturn(tasks);
+        when(taskRepo.findByType(anyString())).thenReturn(taskEntities);
 
-        List<Task> foundTasks = service.getTasksByType(task.getType().getName());
+        List<TaskEntity> foundTaskEntities = service.getTasksByType(task.getType().getName());
 
-        Assertions.assertNotEquals(0, foundTasks.size());
+        Assertions.assertNotEquals(0, foundTaskEntities.size());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Get Tasks By Type FAILED         //////////////////////////////////////////////////
+    ////////////////////             Get Tasks By TypeEntity FAILED         //////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Failed: Type name doesn't exist
+    // Failed: TypeEntity name doesn't exist
     @Test
     void getTaskByType_NameNotInTable_Failure() {
-        task.setType(new TaskType(2,"TASK TEST FAIL"));
+        task.setType(new TypeEntity(2,"TASK TEST FAIL"));
 
         Assertions.assertThrows(FailedToGetTask.class,
                 () -> service.getTasksByType("TASK TEST FAIL"),
-                "Failed to get task: Type is invalid: TASK TEST FAIL");
+                "Failed to get task: TypeEntity is invalid: TASK TEST FAIL");
     }
 
-    // Failed: Type is null
+    // Failed: TypeEntity is null
     @Test
     void getTaskByType_IsNull_Failure() {
         task.setType(null);
 
         Assertions.assertThrows(FailedToGetTask.class,
                 () -> service.getTasksByType(null),
-                "Failed to get task: Type is invalid: null");
+                "Failed to get task: TypeEntity is invalid: null");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -468,164 +466,164 @@ class TaskServiceTest {
     // Success: 1+ tasks
     @Test
     void getAllTasks_OneOrMore_Success() {
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(savedTask);
+        List<TaskEntity> taskEntities = new ArrayList<>();
+        taskEntities.add(savedTaskEntity);
 
-        when(taskRepo.findAll()).thenReturn(tasks);
+        when(taskRepo.findAll()).thenReturn(taskEntities);
 
-        List<Task> allTasks = service.getAllTasks();
+        List<TaskEntity> allTaskEntities = service.getAllTasks();
 
-        Assertions.assertNotEquals(0, allTasks.size());
+        Assertions.assertNotEquals(0, allTaskEntities.size());
     }
 
     // Success: no tasks
     @Test
     void getAllTasks_NoTasks_Success() {
-        List<Task> tasks = new ArrayList<>();
+        List<TaskEntity> taskEntities = new ArrayList<>();
 
-        when(taskRepo.findAll()).thenReturn(tasks);
+        when(taskRepo.findAll()).thenReturn(taskEntities);
 
-        List<Task> allTasks = service.getAllTasks();
+        List<TaskEntity> allTaskEntities = service.getAllTasks();
 
-        Assertions.assertEquals(0, allTasks.size());
+        Assertions.assertEquals(0, allTaskEntities.size());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Update Task SUCCESS         //////////////////////////////////////////////////////
+    ////////////////////             Update TaskEntity SUCCESS         //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Success: Correct Status
+    // Success: Correct StatusEntity
     @Test
     void updateTask_Correct_Success() throws FailedToUpdateTask {
-        task.setStatus(new TaskStatus(2, "Completed"));
-        savedTask.setStatus(new TaskStatus(2, "Completed"));
+        task.setStatus(new StatusEntity(2, "Completed"));
+        savedTaskEntity.setStatus(new StatusEntity(2, "Completed"));
 
-        when(taskRepo.save(any())).thenReturn(savedTask);
+        when(taskRepo.save(any())).thenReturn(savedTaskEntity);
         when(taskRepo.existsById(anyLong())).thenReturn(true);
 
-        Task newTask = service.updateTask(task);
+        TaskEntity newTask = service.updateTask(task);
         Assertions.assertEquals(task.getStatus().getName(), newTask.getStatus().getName());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Update Task FAILED         /////////////////////////////////////////////////
+    ////////////////////             Update TaskEntity FAILED         /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Failed: Type null
+    // Failed: TypeEntity null
     @Test
     void updateTask_NullType_Failure() {
-        Task failTask = new Task(0,
-                "Test Task",
+        TaskEntity failTaskEntity = new TaskEntity(0,
+                "Test TaskEntity",
                 null,
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
-    // Failed: Type doesn't exist
+    // Failed: TypeEntity doesn't exist
     @Test
     void updateTask_TypeNotExist_Failure() {
-        Task failTask = new Task(0,
-                "Test Task",
-                new TaskType(3, "TEST"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+        TaskEntity failTaskEntity = new TaskEntity(0,
+                "Test TaskEntity",
+                new TypeEntity(3, "TEST"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Name null
     @Test
     void updateTask_NullName_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 null,
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
     // Failed: Empty String Name
     @Test
     void updateTask_EmptyStringName_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
-    // Failed: Status null
+    // Failed: StatusEntity null
     @Test
     void updateTask_NullStatus_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
+                new TypeEntity(1, "Cleaning"),
                 null,
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
-    // Failed: Status doesn't exist
+    // Failed: StatusEntity doesn't exist
     @Test
     void updateTask_StatusNotExist_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(3, "TEST"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(3, "TEST"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
     // Failed: null recurrence
     @Test
     void updateTask_NullRecurrence_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
                 null,
                 LocalDate.parse("2023-12-28"),
                 null,
@@ -633,54 +631,54 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
-    // Failed: Recurrence doesn't exist
+    // Failed: RecurrenceEntity doesn't exist
     @Test
     void updateTask_RecurrenceNotExist_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(3, "WEEKLY", "TEST", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(3, new CategoryEntity(1, "WEEKLY"), "TEST", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
     // Failed: null date initiated
     @Test
     void updateTask_NullInitiateDate_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 null,
                 null,
                 false);
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
     // Failed: task doesn't exist
     @Test
     void updateTask_taskNotExist_Failure() {
-        Task failTask = new Task(0,
+        TaskEntity failTaskEntity = new TaskEntity(0,
                 "test task",
-                new TaskType(1, "Cleaning"),
-                new TaskStatus(1, "not started"),
-                new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28")),
+                new TypeEntity(1, "Cleaning"),
+                new StatusEntity(1, "not started"),
+                new RecurrenceEntity(1, new CategoryEntity(1, "WEEKLY"), "TUESDAY", LocalDate.parse("2023-12-28")),
                 LocalDate.parse("2023-12-28"),
                 null,
                 false);
@@ -690,26 +688,26 @@ class TaskServiceTest {
 
         Assertions.assertThrows(
                 FailedToUpdateTask.class,
-                () -> service.updateTask(failTask),
+                () -> service.updateTask(failTaskEntity),
                 "Failed to update: task is invalid");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Complete Task SUCCESS         /////////////////////////////////////////////////////
+    ////////////////////             Complete TaskEntity SUCCESS         /////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Success: complete task
     @Test
     void completeTask_NullCompleteDate_Success() throws FailedToCompleteTask {
-        savedTask.setComplete(true);
-        savedTask.setDateCompleted(new Date(System.currentTimeMillis()).toLocalDate());
-        savedTask.setStatus(new TaskStatus(1,"COMPLETED"));
+        savedTaskEntity.setComplete(true);
+        savedTaskEntity.setDateCompleted(new Date(System.currentTimeMillis()).toLocalDate());
+        savedTaskEntity.setStatus(new StatusEntity(1,"COMPLETED"));
 
-        when(taskRepo.findById(anyLong())).thenReturn(savedTask);
-        when(statusRepo.findByName(anyString())).thenReturn(new TaskStatus(1,"COMPLETED"));
-        when(taskRepo.save(any())).thenReturn(savedTask);
+        when(taskRepo.findById(anyLong())).thenReturn(savedTaskEntity);
+        when(statusRepo.findByName(anyString())).thenReturn(new StatusEntity(1,"COMPLETED"));
+        when(taskRepo.save(any())).thenReturn(savedTaskEntity);
 
-        Task newTask = service.complete(task.getId());
+        TaskEntity newTask = service.complete(task.getId());
 
         Assertions.assertTrue(newTask.isComplete());
         Assertions.assertNotEquals(task.getDateCompleted(), newTask.getDateCompleted());
@@ -717,7 +715,7 @@ class TaskServiceTest {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Complete Task FAILED         //////////////////////////////////////////////////////
+    ////////////////////             Complete TaskEntity FAILED         //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Failed: complete task
@@ -729,7 +727,7 @@ class TaskServiceTest {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Delete Task SUCCESS         ///////////////////////////////////////////////////////
+    ////////////////////             Delete TaskEntity SUCCESS         ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Success: delete task
@@ -743,7 +741,7 @@ class TaskServiceTest {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////             Delete Task FAILED         ///////////////////////////////////////////////////////
+    ////////////////////             Delete TaskEntity FAILED         ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Failed: delete task

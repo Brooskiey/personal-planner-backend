@@ -9,16 +9,17 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
-@Table(name = "RECURR_TASK")
-public class RecurrTask {
+@Table(name = "RECURRENCE")
+public class RecurrenceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "recurr_id")
     private long id;
 
-    @Column(name = "category")
-    private String category;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id")
+    private CategoryEntity category;
 
     @Column(name = "recurrence")
     private String recurrence;
@@ -26,14 +27,14 @@ public class RecurrTask {
     @Column(name = "last_date")
     private LocalDate lastDate;
 
-    public RecurrTask(long id, String category, String recurrence, LocalDate lastDate) {
+    public RecurrenceEntity(long id, CategoryEntity category, String recurrence, LocalDate lastDate) {
         this.id = id;
         this.category = category;
         this.recurrence = recurrence;
         this.lastDate = lastDate;
     }
 
-    public RecurrTask() {
+    public RecurrenceEntity() {
 
     }
 }

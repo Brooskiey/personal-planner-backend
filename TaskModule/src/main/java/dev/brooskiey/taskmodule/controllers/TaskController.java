@@ -2,7 +2,7 @@ package dev.brooskiey.taskmodule.controllers;
 
 import dev.brooskiey.taskmodule.dtos.TaskDTO;
 import dev.brooskiey.taskmodule.exceptions.*;
-import dev.brooskiey.taskmodule.models.Task;
+import dev.brooskiey.taskmodule.models.TaskEntity;
 import dev.brooskiey.taskmodule.services.TaskService;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -27,8 +27,8 @@ public class TaskController {
             consumes="application/json",
             produces="application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public Task createTask(@RequestBody TaskDTO taskDTO) throws FailedToCreateTask {
-        Task task = convertToDto(taskDTO);
+    public TaskEntity createTask(@RequestBody TaskDTO taskDTO) throws FailedToCreateTask {
+        TaskEntity task = convertToDto(taskDTO);
         return service.createTask(task);
 }
 
@@ -36,35 +36,35 @@ public class TaskController {
             consumes="application/json",
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<Task> getAllTasks() {
+    public List<TaskEntity> getAllTasks() {
         return service.getAllTasks();
     }
 
     @GetMapping(value="/{id}",
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public Task getTaskById(@PathVariable Long id) throws FailedToGetTask {
+    public TaskEntity getTaskById(@PathVariable Long id) throws FailedToGetTask {
         return service.getTaskById(id);
     }
 
     @GetMapping(value="/days/{date}",
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<Task> getTasksByDate(@PathVariable String date) throws FailedToGetTask {
+    public List<TaskEntity> getTasksByDate(@PathVariable String date) throws FailedToGetTask {
         return service.getTasksByDate(date);
     }
 
     @GetMapping(value="/weeks/{date}",
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<Task> getTasksByWeek(@PathVariable String date) {
+    public List<TaskEntity> getTasksByWeek(@PathVariable String date) {
         return service.getTasksByWeek(date);
     }
 
     @GetMapping(value="/types/{typeName}",
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<Task> getTasksByType(@PathVariable String typeName) {
+    public List<TaskEntity> getTasksByType(@PathVariable String typeName) {
         return service.getTasksByType(typeName);
     }
 
@@ -72,8 +72,8 @@ public class TaskController {
             consumes="application/json",
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public Task updateTask(@RequestBody TaskDTO taskDTO) throws FailedToUpdateTask {
-        Task task = convertToDto(taskDTO);
+    public TaskEntity updateTask(@RequestBody TaskDTO taskDTO) throws FailedToUpdateTask {
+        TaskEntity task = convertToDto(taskDTO);
         return service.updateTask(task);
     }
 
@@ -81,7 +81,7 @@ public class TaskController {
             consumes="application/json",
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public Task completeTask(@PathVariable("id") long id) throws FailedToCompleteTask {
+    public TaskEntity completeTask(@PathVariable("id") long id) throws FailedToCompleteTask {
         return service.complete(id);
     }
 
@@ -92,7 +92,7 @@ public class TaskController {
         return service.deleteTask(id);
     }
 
-    private Task convertToDto(TaskDTO taskDTO) {
-        return modelMapper.map(taskDTO, Task.class);
+    private TaskEntity convertToDto(TaskDTO taskDTO) {
+        return modelMapper.map(taskDTO, TaskEntity.class);
     }
 }

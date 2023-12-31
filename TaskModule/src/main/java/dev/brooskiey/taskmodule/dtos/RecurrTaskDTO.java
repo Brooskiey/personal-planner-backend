@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public class RecurrTaskDTO {
 
     private long id;
-    private String category;
+    private CategoryDTO category;
     private String recurrence;
     private LocalDate lastDate;
 }

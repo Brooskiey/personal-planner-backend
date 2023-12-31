@@ -1,7 +1,8 @@
 package dev.brooskiey.taskmodule.repositories;
 
 import dev.brooskiey.taskmodule.TaskModuleApplication;
-import dev.brooskiey.taskmodule.models.RecurrTask;
+import dev.brooskiey.taskmodule.models.CategoryEntity;
+import dev.brooskiey.taskmodule.models.RecurrenceEntity;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,49 +18,54 @@ import java.util.List;
 class RecurrRepoTest {
 
     @Autowired
-    private RecurrTaskRepo recurrRepo;
+    private RecurrRepo recurrRepo;
+
+    @Autowired
+    private CategoryRepo categoryRepo;
     
-    RecurrTask recurrTask;
+    RecurrenceEntity recurrence;
 
     // Setup for the tests
     @BeforeAll
     void setup() {
-        RecurrTask recurTask = new RecurrTask(1, "WEEKLY", "TUESDAY", LocalDate.parse("2023-12-28"));
-        recurrTask = recurrRepo.save(recurTask);
-        Assertions.assertNotEquals(0, recurrTask.getId());
+        CategoryEntity category = new CategoryEntity(1, "Cleaning");
+        categoryRepo.save(category);
+        recurrence = new RecurrenceEntity(1, category, "TUESDAY", LocalDate.parse("2023-12-28"));
+        recurrence = recurrRepo.save(recurrence);
+        Assertions.assertNotEquals(0, recurrence.getId());
     }
 
     // Save success
     @Test
     @Order(1)
     void saveRecurrTask_success() {
-        recurrTask = recurrRepo.save(recurrTask);
-        Assertions.assertNotEquals(0, recurrTask.getId());
+        recurrence = recurrRepo.save(recurrence);
+        Assertions.assertNotEquals(0, recurrence.getId());
     }
 
     // Get task by id success
     @Test
     @Order(2)
     void getRecurrTaskById_success() {
-        RecurrTask recurrTaskFound = recurrRepo.findById(recurrTask.getId());
-        Assertions.assertNotNull(recurrTaskFound);
-        Assertions.assertEquals(recurrTask.getId(), recurrTaskFound.getId());
+        RecurrenceEntity recurrenceFound = recurrRepo.findById(recurrence.getId());
+        Assertions.assertNotNull(recurrenceFound);
+        Assertions.assertEquals(recurrence.getId(), recurrenceFound.getId());
     }
 
     // Get task by id success
     @Test
     @Order(3)
     void getRecurrTaskByName_success() {
-        RecurrTask recurrTaskFound = recurrRepo.findByRecurrence(recurrTask.getRecurrence());
-        Assertions.assertNotNull(recurrTaskFound);
-        Assertions.assertEquals(recurrTask.getId(), recurrTaskFound.getId());
+        RecurrenceEntity recurrenceFound = recurrRepo.findByRecurrence(recurrence.getRecurrence());
+        Assertions.assertNotNull(recurrenceFound);
+        Assertions.assertEquals(recurrence.getId(), recurrenceFound.getId());
     }
 
     // Get all success
     @Test
     @Order(4)
     void getAllRecurrTask_success() {
-        List<RecurrTask> tasks = (List<RecurrTask>) recurrRepo.findAll();
+        List<RecurrenceEntity> tasks = (List<RecurrenceEntity>) recurrRepo.findAll();
         Assertions.assertNotEquals(0, tasks.size());
     }
 
@@ -68,26 +74,26 @@ class RecurrRepoTest {
     @Order(5)
     void updateRecurrTask_success() {
 
-        recurrTask.setLastDate(LocalDate.parse("2023-12-28"));
+        recurrence.setLastDate(LocalDate.parse("2023-12-28"));
 
-        RecurrTask savedRecurrTask = recurrRepo.save(recurrTask);
-        Assertions.assertEquals(recurrTask.getLastDate(), savedRecurrTask.getLastDate());
-        Assertions.assertEquals(recurrTask.getId(), savedRecurrTask.getId());
+        RecurrenceEntity savedRecurrenceEntity = recurrRepo.save(recurrence);
+        Assertions.assertEquals(recurrence.getLastDate(), savedRecurrenceEntity.getLastDate());
+        Assertions.assertEquals(recurrence.getId(), savedRecurrenceEntity.getId());
     }
 
     // delete success
     @Test
     @Order(6)
     void deleteTask_success() {
-        recurrRepo.deleteById(recurrTask.getId());
-        Assertions.assertNull(recurrRepo.findById(recurrTask.getId()));
+        recurrRepo.deleteById(recurrence.getId());
+        Assertions.assertNull(recurrRepo.findById(recurrence.getId()));
     }
 
     // Teardown
     @AfterAll
     void teardown() {
         recurrRepo.deleteAll();
-        Assertions.assertEquals(0, ((List<RecurrTask>) recurrRepo.findAll()).size());
+        Assertions.assertEquals(0, ((List<RecurrenceEntity>) recurrRepo.findAll()).size());
     }
 
 }

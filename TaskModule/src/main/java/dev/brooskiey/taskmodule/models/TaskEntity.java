@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Table(name = "TASK")
-public class Task {
+public class TaskEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,15 +23,15 @@ public class Task {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "type_id")
-    private TaskType type;
+    private TypeEntity type;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status_id")
-    private TaskStatus status;
+    private StatusEntity status;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "recurr_id")
-    private RecurrTask recurrence;
+    private RecurrenceEntity recurrence;
 
     @Column(name = "date_initiated", nullable = false)
     private LocalDate dateInitiated;
@@ -42,10 +42,10 @@ public class Task {
     @Column(name = "is_complete", nullable = false)
     private boolean isComplete;
 
-    public Task(long id, String name, TaskType type,
-                TaskStatus status, RecurrTask recurrence,
-                LocalDate dateInitiated, LocalDate dateCompleted,
-                boolean isComplete) {
+    public TaskEntity(long id, String name, TypeEntity type,
+                      StatusEntity status, RecurrenceEntity recurrence,
+                      LocalDate dateInitiated, LocalDate dateCompleted,
+                      boolean isComplete) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -56,6 +56,6 @@ public class Task {
         this.isComplete = isComplete;
     }
 
-    public Task() {
+    public TaskEntity() {
     }
 }

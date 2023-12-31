@@ -7,23 +7,22 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "TASK_STATUS")
-public class TaskStatus {
+@Table(name = "CATEGORY")
+public class CategoryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "category_id")
     private long id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    public TaskStatus(long id, String name) {
+    public CategoryEntity(long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public TaskStatus() {
-
+    public CategoryEntity() {
     }
 }
