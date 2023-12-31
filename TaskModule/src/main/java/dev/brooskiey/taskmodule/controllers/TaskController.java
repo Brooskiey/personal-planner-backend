@@ -58,7 +58,7 @@ public class TaskController {
             produces="application/json")
     @ResponseStatus(HttpStatus.OK)
     public List<Task> getTasksByWeek(@PathVariable String date) {
-        return null;
+        return service.getTasksByWeek(date);
     }
 
     @GetMapping(value="/types/{typeName}",

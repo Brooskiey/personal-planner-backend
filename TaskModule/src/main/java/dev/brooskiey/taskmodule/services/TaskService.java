@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -64,6 +66,33 @@ public class TaskService {
             return taskRepo.findByDateInitiated(date);
         } catch (DateTimeParseException e) {
             throw new FailedToGetTask("Failed to get task: " + e.getMessage());
+        }
+    }
+
+    // Get tasks by week
+    public List<Task> getTasksByWeek(String dateStr) throws FailedToGetTask {
+        if(dateStr.equals("")) {
+            throw new FailedToGetTask("Failed to get task: date is invalid: " + dateStr);
+        }
+        try {
+            int i = 0;
+
+            LocalDate date = LocalDate.parse(dateStr);
+            List<Task> tasks = new ArrayList<>();
+
+            int day = moveDateToMonday(date);
+            date = date.minusDays(day);
+
+            while (i < 7) {
+                List<Task> tasksForDate = getTasksByDate(date.format(DateTimeFormatter.ISO_DATE));
+                tasks.addAll(tasksForDate);
+                date = date.plusDays(1);
+                i++;
+            }
+            return tasks;
+        } catch (DateTimeParseException e) {
+            throw new FailedToGetTask("Failed to get task: " + e.getMessage());
+
         }
     }
 
@@ -126,5 +155,18 @@ public class TaskService {
         if(!isValidTask(task) || !taskRepo.existsById(task.getId())) {
             throw new FailedToUpdateTask("Failed to update: task is invalid");
         }
+    }
+
+    // Helper for search for tasks in a given week. Takes the day and backs the date sent back to Monday of that week
+    private int moveDateToMonday(LocalDate date) {
+        return switch (date.getDayOfWeek()) {
+            case MONDAY -> 0;
+            case TUESDAY -> 1;
+            case WEDNESDAY -> 2;
+            case THURSDAY -> 3;
+            case FRIDAY -> 4;
+            case SATURDAY -> 5;
+            case SUNDAY -> 6;
+        };
     }
 }

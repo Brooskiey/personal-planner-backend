@@ -10,6 +10,8 @@ import dev.brooskiey.taskmodule.repositories.TaskRepo;
 import dev.brooskiey.taskmodule.repositories.TaskStatusRepo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -353,6 +355,68 @@ class TaskServiceTest {
 
         Assertions.assertThrows(FailedToGetTask.class,
                 () -> service.getTasksByDate(""),
+                "Failed to get task: date is invalid: ");
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////             Get Tasks By Week SUCCESS         /////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Success: Days of the week
+    @ParameterizedTest
+    @ValueSource(strings = {"2023-12-25","2023-12-26","2023-12-27","2023-12-28","2023-12-29","2023-12-30","2023-12-31"})
+    void getTaskByWeek_MondayTasks_Success(String day) throws FailedToGetTask {
+        List<Task> tasks = new ArrayList<>();
+        tasks.add(savedTask);
+
+        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+
+        List<Task> foundTasks = service.getTasksByWeek(day);
+
+        Assertions.assertEquals(7, foundTasks.size());
+    }
+
+    // Success: 0 tasks
+    @Test
+    void getTaskByWeek_ZeroTask_Success() throws FailedToGetTask {
+        List<Task> tasks = new ArrayList<>();
+
+        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+
+        List<Task> foundTasks = service.getTasksByWeek(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE));
+
+        Assertions.assertEquals(0, foundTasks.size());
+    }
+
+    // Success: does not throw error
+    @Test
+    void getTaskByWeek_DoesNotThrowError_Success() {
+        List<Task> tasks = new ArrayList<>();
+
+        when(taskRepo.findByDateInitiated(any())).thenReturn(tasks);
+
+        Assertions.assertDoesNotThrow(() -> service.getTasksByWeek(task.getDateInitiated().format(DateTimeFormatter.ISO_DATE)));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////             Get Tasks By Week FAILED         //////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Failed: Date is invalid
+    @Test
+    void getTaskByWeek_InvalidDate_Failure() {
+
+        Assertions.assertThrows(FailedToGetTask.class,
+                () -> service.getTasksByWeek("null"),
+                "Failed to get task: date is invalid: null");
+    }
+
+    // Failed: Date is empty string
+    @Test
+    void getTaskByWeek_EmptyStringDate_Failure() {
+
+        Assertions.assertThrows(FailedToGetTask.class,
+                () -> service.getTasksByWeek(""),
                 "Failed to get task: date is invalid: ");
     }
 
