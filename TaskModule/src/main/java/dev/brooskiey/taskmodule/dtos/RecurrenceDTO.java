@@ -5,9 +5,14 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/**
+ * Recurrence data transfer object
+ * @author Brooskiey Bullet
+ * @version 01.01.2024
+ */
 @Getter
 @Setter
-public class RecurrTaskDTO {
+public class RecurrenceDTO {
 
     private long id;
     private CategoryDTO category;

@@ -4,17 +4,24 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Category DB entity
+ * @author Brooskiey Bullet
+ * @version 01.01.2024
+ */
 @Entity
 @Getter
 @Setter
 @Table(name = "CATEGORY")
 public class CategoryEntity {
 
+    /** Primary key CATEGORY_ID */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
+    @Column(name = "id")
     private long id;
 
+    /** The name of the category */
     @Column(name = "name", nullable = false)
     private String name;
 

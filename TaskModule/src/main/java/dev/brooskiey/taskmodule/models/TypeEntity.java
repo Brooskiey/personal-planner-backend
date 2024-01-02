@@ -4,17 +4,24 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Type DB entity
+ * @author Brooskiey Bullet
+ * @version 01.01.2024
+ */
 @Entity
 @Getter
 @Setter
 @Table(name = "TYPE")
 public class TypeEntity {
 
+    /** Primary key TYPE_ID */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "type_id", nullable = false)
+    @Column(name = "id", nullable = false)
     private long id;
 
+    /** name of the type */
     @Column(name = "name", nullable = false)
     private String name;
 
