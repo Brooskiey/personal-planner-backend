@@ -2,7 +2,9 @@ package dev.brooskiey.taskmodule.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Category DB entity
@@ -12,6 +14,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@ToString
+@NoArgsConstructor
 @Table(name = "CATEGORY")
 public class CategoryEntity {
 
@@ -28,8 +32,5 @@ public class CategoryEntity {
     public CategoryEntity(long id, String name) {
         this.id = id;
         this.name = name;
-    }
-
-    public CategoryEntity() {
     }
 }

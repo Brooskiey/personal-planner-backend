@@ -2,7 +2,9 @@ package dev.brooskiey.taskmodule.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Status DB entity
@@ -12,6 +14,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@ToString
+@NoArgsConstructor
 @Table(name = "STATUS")
 public class StatusEntity {
 
@@ -28,9 +32,5 @@ public class StatusEntity {
     public StatusEntity(long id, String name) {
         this.id = id;
         this.name = name;
-    }
-
-    public StatusEntity() {
-
     }
 }

@@ -2,6 +2,7 @@ package dev.brooskiey.taskmodule.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Type data transfer object
@@ -10,6 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 public class TypeDTO {
 
     private long id;

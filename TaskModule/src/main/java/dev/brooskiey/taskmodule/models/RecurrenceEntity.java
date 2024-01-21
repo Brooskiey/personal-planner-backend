@@ -2,7 +2,9 @@ package dev.brooskiey.taskmodule.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -14,6 +16,8 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
+@ToString
+@NoArgsConstructor
 @Table(name = "RECURRENCE")
 public class RecurrenceEntity {
 
@@ -41,9 +45,5 @@ public class RecurrenceEntity {
         this.category = category;
         this.recurrence = recurrence;
         this.lastDate = lastDate;
-    }
-
-    public RecurrenceEntity() {
-
     }
 }

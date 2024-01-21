@@ -2,7 +2,9 @@ package dev.brooskiey.taskmodule.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -14,6 +16,8 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
+@ToString
+@NoArgsConstructor
 @Table(name = "TASK")
 public class TaskEntity {
 
@@ -66,8 +70,5 @@ public class TaskEntity {
         this.dateInitiated = dateInitiated;
         this.dateCompleted = dateCompleted;
         this.isComplete = isComplete;
-    }
-
-    public TaskEntity() {
     }
 }
